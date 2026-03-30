@@ -46,17 +46,19 @@ input,textarea,select{font-family:'Sarabun',sans-serif;}
 .overview-wrap{max-width:680px;margin:0 auto;padding:20px 16px;width:100%;}
 .add-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;margin-bottom:18px;box-shadow:var(--shadow);}
 .add-box-title{font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px;}
-.add-row{display:flex;gap:8px;margin-bottom:8px;}
-.add-row:last-child{margin-bottom:0;}
-.add-input{flex:1;background:#F0F7FF;border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;}
+
+/* ปรับปรุง Responsive ให้ปุ่มและช่องกรอก */
+.add-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.add-input{flex:1;min-width:140px;background:#F0F7FF;border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;}
 .add-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(21,101,192,0.08);}
 .add-input::placeholder{color:var(--text3);}
-.btn-add{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;border-radius:var(--radius-sm);padding:10px 22px;font-size:14px;font-weight:500;white-space:nowrap;transition:all .2s;box-shadow:0 2px 8px rgba(21,101,192,0.2);}
+.btn-add{flex:1;min-width:80px;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;border-radius:var(--radius-sm);padding:10px 22px;font-size:14px;font-weight:500;white-space:nowrap;transition:all .2s;box-shadow:0 2px 8px rgba(21,101,192,0.2);}
 .btn-add:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(21,101,192,0.3);}
 .btn-add:disabled{background:#90A4AE;cursor:not-allowed;transform:none;box-shadow:none;}
+
 .total-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:18px;}
 .tstat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 10px;text-align:center;box-shadow:var(--shadow);}
-.tstat-num{font-family:'Kanit',sans-serif;font-size:22px;font-weight:600;}
+.tstat-num{font-family:'Kanit',sans-serif;font-size:18px;font-weight:600;}
 .tstat-lbl{font-size:10px;color:var(--text3);margin-top:2px;line-height:1.3;}
 .dept-cards{display:flex;flex-direction:column;gap:12px;}
 .dept-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:all .2s;}
@@ -128,44 +130,118 @@ input,textarea,select{font-family:'Sarabun',sans-serif;}
 .card:hover .arrow{color:var(--blue);}
 .empty{text-align:center;color:var(--text3);padding:44px;font-size:14px;}
 .empty-icon{font-size:30px;display:block;margin-bottom:8px;opacity:.5;}
+
+/* DETAIL PAGE STYLES */
 .detail-wrap{max-width:660px;margin:0 auto;padding:20px 16px;width:100%;}
-.detail-header{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:var(--shadow);border-top:3px solid var(--blue);}
-.detail-title{font-family:'Kanit',sans-serif;font-size:18px;font-weight:500;margin-bottom:14px;color:var(--text);}
-.detail-meta{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
-.sec-label{font-size:11px;font-weight:600;color:var(--text3);margin-bottom:10px;letter-spacing:.06em;text-transform:uppercase;}
-.status-tabs{display:flex;gap:8px;flex-wrap:wrap;}
-.stab{padding:8px 18px;border-radius:99px;font-size:13px;border:1.5px solid var(--border2);background:var(--surface3);color:var(--text2);transition:all .15s;cursor:pointer;}
-.stab.disabled-tab{opacity:.4;cursor:not-allowed !important;background:#ECEFF1 !important;border-color:#CFD8DC !important;color:#90A4AE !important;}
-.stab.sw.on{background:#FFF3E0;color:#BF360C;border-color:#FFAB40;font-weight:500;}
-.stab.sd.on{background:#E3F2FD;color:#0D47A1;border-color:#64B5F6;font-weight:500;}
-.stab.sdn.on{background:#E8F5E9;color:#1B5E20;border-color:#66BB6A;font-weight:500;}
+.detail-header{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:var(--shadow);border-top:4px solid var(--blue);}
+.detail-title{font-family:'Kanit',sans-serif;font-size:20px;font-weight:600;margin-bottom:14px;color:var(--text);}
+.detail-meta{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+
+/* Stepper Progress Styles (MODIFIED) */
+.stepper-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin: 25px 0;
+  position: relative;
+  padding: 0;
+}
+/* เส้นสีเทาด้านหลัง - ปรับตำแหน่งให้เริ่มกึ่งกลางเลข 1 ถึงกึ่งกลางเลข 3 */
+.stepper-wrapper::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  left: 17px;
+  right: 17px;
+  height: 4px;
+  background: #E0E0E0;
+  z-index: 0;
+  border-radius: 4px;
+}
+/* เส้นสีเขียวที่วิ่งตามสถานะ */
+.stepper-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 16px;
+  left: 17px;
+  width: var(--progress-width, 0%);
+  height: 4px;
+  background: #43A047;
+  z-index: 1;
+  border-radius: 4px;
+  transition: width 0.5s ease-in-out;
+  max-width: calc(100% - 34px);
+}
+
+.stepper-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+.step-counter {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #E0E0E0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: #90A4AE;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+  font-size: 13px;
+}
+.step-name { font-size: 11px; color: var(--text3); font-weight: 500; text-align: center; }
+
+/* Active & Completed States */
+.stepper-item.active .step-counter { border-color: var(--blue); color: var(--blue); transform: scale(1.1); background: #fff; }
+.stepper-item.active .step-name { color: var(--blue); font-weight: 600; }
+.stepper-item.completed .step-counter { background: #43A047; border-color: #43A047; color: white; }
+.stepper-item.completed .step-name { color: #43A047; }
+
+/* NEW: Dropdown style inside tl-box */
+.tl-box .status-dropdown {
+  background: #fff;
+  border: 1.5px solid var(--border2);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  min-width: 150px;
+}
+.tl-box .status-dropdown:focus { border-color: var(--blue); }
+.tl-box .status-dropdown:disabled { background: #f1f1f1; cursor: not-allowed; opacity: 0.7; }
+
 .note-box,.tl-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:var(--shadow);}
 .note-box textarea{width:100%;background:#F0F7FF;border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 13px;font-size:13px;color:var(--text);resize:vertical;min-height:80px;outline:none;transition:border-color .2s;line-height:1.6;}
-.note-box textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(21,101,192,0.08);}
-.note-box textarea::placeholder{color:var(--text3);}
 .note-btn-row{display:flex;justify-content:flex-end;margin-top:9px;}
-.btn-note{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 20px;font-size:13px;font-weight:500;transition:all .2s;box-shadow:0 2px 8px rgba(21,101,192,0.2);}
-.btn-note:hover{transform:translateY(-1px);}
-.tl{display:flex;flex-direction:column;}
+.btn-note{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 20px;font-size:13px;font-weight:500;box-shadow:0 2px 8px rgba(21,101,192,0.2);}
+
 .tl-item{display:flex;gap:11px;padding-bottom:14px;position:relative;}
 .tl-item:not(:last-child)::before{content:'';position:absolute;left:14px;top:28px;bottom:0;width:1px;background:var(--border);}
 .tl-dot{width:28px;height:28px;border-radius:50%;background:#E3F2FD;border:1.5px solid #90CAF9;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;color:var(--blue);}
-.tl-dot.nd{background:#E3F2FD;border-color:#64B5F6;}
-.tl-dot.sd{background:#E8F5E9;border-color:#81C784;}
-.tl-body{flex:1;padding-top:3px;}
-.tl-text{font-size:13px;line-height:1.55;background:#F0F7FF;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;white-space:pre-wrap;word-break:break-word;color:var(--text);}
-.tl-text.sc{background:#E8F5E9;color:#1B5E20;border-color:#A5D6A7;font-size:12px;padding:5px 10px;}
-.tl-text.cr{color:var(--text3);font-size:12px;padding:5px 10px;background:transparent;border-color:transparent;font-style:italic;}
+.tl-text{font-size:13px;line-height:1.55;background:#F0F7FF;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;white-space:pre-wrap;color:var(--text);}
 .tl-foot{display:flex;align-items:center;gap:5px;margin-top:4px;}
 .tl-time{font-size:11px;color:var(--text3);}
-.tl-new{background:#E3F2FD;color:var(--blue);font-size:10px;padding:2px 7px;border-radius:99px;font-weight:600;}
-.btn-tl-del{background:none;border:none;color:var(--text3);font-size:11px;padding:1px 4px;border-radius:3px;cursor:pointer;}
-.btn-tl-del:hover{color:#D32F2F;}
 .dept-pill{border-radius:99px;padding:3px 12px;font-size:12px;font-weight:600;}
 .dept-pill-GA{background:var(--ga-light);color:var(--ga);}
 .dept-pill-SHE{background:var(--she-light);color:var(--she);}
 .dept-pill-HR{background:var(--hr-light);color:var(--hr);}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;padding:10px 22px;border-radius:99px;font-size:13px;display:none;z-index:99;white-space:nowrap;box-shadow:0 4px 18px rgba(21,101,192,0.35);}
+
+/* Media query for small screens */
+@media (max-width: 480px) {
+  .tl-box div[style*="display: flex"] { flex-direction: column; align-items: flex-start !important; gap: 10px; }
+  .tl-box .status-dropdown { width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -188,7 +264,7 @@ input,textarea,select{font-family:'Sarabun',sans-serif;}
         <input class="add-input" style="flex:2;" type="text" id="inp-assign" placeholder="👤 ผู้รับผิดชอบ" onkeydown="if(event.key==='Enter')addItem()"/>
         
         <select class="add-input" id="inp-dept" style="flex:1.2; cursor:pointer; background-color:#fff;" onchange="updateAddBtn()">
-          <option value="" disabled selected>🏢 เลือกแผนก</option>
+          <option value="" disabled selected>ระบุแผนก</option>
           <option value="GA">🏢 GA</option>
           <option value="SHE">🛡️ SHE</option>
           <option value="HR">👥 HR</option>
@@ -199,7 +275,7 @@ input,textarea,select{font-family:'Sarabun',sans-serif;}
     </div>
     <div class="total-stats">
       <div class="tstat"><div class="tstat-num" id="ov-all" style="color:var(--blue)">0</div><div class="tstat-lbl">งานทั้งหมด</div></div>
-      <div class="tstat"><div class="tstat-num" id="ov-w" style="color:#E65100">0</div><div class="tstat-lbl">กำลังดำเนินการ</div></div>
+      <div class="tstat"><div class="tstat-num" id="ov-w" style="color:#E65100">0</div><div class="tstat-lbl">กำลังทำ</div></div>
       <div class="tstat"><div class="tstat-num" id="ov-d" style="color:#1565C0">0</div><div class="tstat-lbl">รอรายงาน</div></div>
       <div class="tstat"><div class="tstat-num" id="ov-dn" style="color:#2E7D32">0</div><div class="tstat-lbl">เสร็จแล้ว</div></div>
     </div>
@@ -217,7 +293,7 @@ input,textarea,select{font-family:'Sarabun',sans-serif;}
     <div class="dept-page-header" id="dept-page-header">
       <div class="dept-page-title" id="dept-page-title"></div>
       <div class="dept-mini-stats">
-        <div class="dmstat"><div class="dmstat-num" id="ds-w" style="color:#E65100">0</div><div class="dmstat-lbl">กำลังดำเนินการ</div></div>
+        <div class="dmstat"><div class="dmstat-num" id="ds-w" style="color:#E65100">0</div><div class="dmstat-lbl">กำลังทำ</div></div>
         <div class="dmstat"><div class="dmstat-num" id="ds-d" style="color:#1565C0">0</div><div class="dmstat-lbl">รอรายงาน</div></div>
         <div class="dmstat"><div class="dmstat-num" id="ds-dn" style="color:#2E7D32">0</div><div class="dmstat-lbl">เสร็จแล้ว</div></div>
       </div>
@@ -243,20 +319,30 @@ input,textarea,select{font-family:'Sarabun',sans-serif;}
         <span id="d-assignee" style="background:#E3F2FD;color:#1565C0;border-radius:99px;padding:3px 12px;font-size:13px;font-weight:600;"></span>
         <span id="d-dept-pill" class="dept-pill"></span>
       </div>
-      <div class="sec-label">เปลี่ยนสถานะ</div>
-      <div class="status-tabs">
-        <div class="stab sw" id="stab-w">กำลังดำเนินการ</div>
-        <div class="stab sd" id="stab-d">รอรายงาน</div>
-        <div class="stab sdn" id="stab-dn">✅ เสร็จแล้ว</div>
+
+      <div class="stepper-wrapper">
+        <div class="stepper-item" id="step-1"><div class="step-counter">1</div><div class="step-name">กำลังทำ</div></div>
+        <div class="stepper-item" id="step-2"><div class="step-counter">2</div><div class="step-name">รอรายงาน</div></div>
+        <div class="stepper-item" id="step-3"><div class="step-counter">3</div><div class="step-name">เสร็จแล้ว</div></div>
       </div>
     </div>
+
     <div class="note-box" id="note-box">
-      <div class="sec-label">เพิ่ม note / ความคืบหน้า</div>
-      <textarea id="d-note" placeholder="เขียน note หรืออัปเดตความคืบหน้า..."></textarea>
-      <div class="note-btn-row"><button class="btn-note" onclick="addNote()">บันทึก note</button></div>
+      <div class="sec-label">ความคืบหน้า</div>
+      <textarea id="d-note" placeholder="ระบุรายละเอียด"></textarea>
+      <div class="note-btn-row"><button class="btn-note" onclick="addNote()">บันทึก</button></div>
     </div>
+
     <div class="tl-box">
-      <div class="sec-label">ประวัติการอัปเดต</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <div class="sec-label" style="margin-bottom: 0;">ประวัติการอัปเดต</div>
+        
+        <select class="status-dropdown" id="d-status-select" onchange="changeStatus(this.value)">
+          <option value="กำลังดำเนินการ">🔄 กำลังทำ</option>
+          <option value="รอรายงาน">📢 รอรายงาน</option>
+          <option value="เสร็จแล้ว">✅ เสร็จแล้ว</option>
+        </select>
+      </div>
       <div class="tl" id="d-tl"></div>
     </div>
   </div>
@@ -342,21 +428,12 @@ function renderOverview(){
   document.getElementById('dept-cards').innerHTML=DEPTS.map(dept=>{
     const dArr=arr.filter(i=>i.dept===dept.key);
     const dActive=dArr.filter(i=>i.status!=='เสร็จแล้ว');
-    const dW=dArr.filter(i=>i.status==='กำลังดำเนินการ').length;
-    const dD=dArr.filter(i=>i.status==='รอรายงาน').length;
-    const dDn=dArr.filter(i=>i.status==='เสร็จแล้ว').length;
     return `<div class="dept-card" onclick="goToDept('${dept.key}')">
       <div class="dept-bar dept-bar-${dept.key}"></div>
       <div class="dept-card-header">
         <div class="dept-icon dept-icon-${dept.key}">${dept.icon}</div>
         <div style="flex:1;"><div class="dept-name dept-name-${dept.key}">${dept.key}</div><div class="dept-total">${dept.label} · ${dActive.length} items</div></div>
         <div class="dept-arrow">›</div>
-      </div>
-      <div class="dept-card-stats">
-        ${dW?`<span class="dstat dstat-w"><span class="dstat-num">${dW}</span> กำลังดำเนินการ</span>`:''}
-        ${dD?`<span class="dstat dstat-d"><span class="dstat-num">${dD}</span> รอรายงาน</span>`:''}
-        ${dDn?`<span class="dstat dstat-dn"><span class="dstat-num">${dDn}</span> เสร็จแล้ว</span>`:''}
-        ${(!dW&&!dD&&!dDn)?`<span style="font-size:12px;color:#90A4AE;">ยังไม่มีงาน</span>`:''}
       </div>
     </div>`;
   }).join('');
@@ -422,50 +499,57 @@ function openDetail(id){
   document.getElementById('detail-header').style.borderTopColor=it.dept==='GA'?'var(--ga)':it.dept==='SHE'?'var(--she)':'var(--hr)';
   document.getElementById('d-note').value='';
 
+  // Update Status Dropdown & Stepper
+  const statusSelect = document.getElementById('d-status-select');
+  statusSelect.value = it.status;
+  
   const statusOrder=['กำลังดำเนินการ','รอรายงาน','เสร็จแล้ว'];
   const curIdx=statusOrder.indexOf(it.status);
 
-  [{el:'stab-w',cls:'sw'},{el:'stab-d',cls:'sd'},{el:'stab-dn',cls:'sdn'}].forEach(({el,cls},i)=>{
-    const t=document.getElementById(el);
-    t.className='stab '+cls;
-    
-    if(i===curIdx) t.classList.add('on');
-
-    // ตรรกะใหม่: 
-    // 1. ถ้างาน "เสร็จแล้ว" ล็อกทุกปุ่ม
-    // 2. ถ้างานยังไม่เสร็จ ปุ่ม "กำลังดำเนินการ" และ "รอรายงาน" ต้องกดสลับไปมาได้
-    if(it.status==='เสร็จแล้ว'){
-      t.classList.add('disabled-tab');
-      t.onclick=null;
-    } else {
-      const s=statusOrder[i];
-      t.classList.remove('disabled-tab');
-      t.onclick=function(){changeStatus(s,this);};
-    }
+  // Stepper logic - ปรับระบายสีและเส้นให้เป๊ะ
+  const stepperWrapper = document.querySelector('.stepper-wrapper');
+  statusOrder.forEach((s, i) => {
+    const step = document.getElementById(`step-${i+1}`);
+    step.classList.remove('active', 'completed');
+    if (i < curIdx) step.classList.add('completed');
+    else if (i === curIdx) step.classList.add('active');
   });
+
+  // คำนวณความยาวเส้นสีเขียว (0%, 50%, 100%)
+  const pWidth = curIdx === 0 ? 0 : curIdx === 1 ? 50 : 100;
+  stepperWrapper.style.setProperty('--progress-width', pWidth + '%');
+
+  // Lock logic
+  statusSelect.disabled = (it.status === 'เสร็จแล้ว');
 
   document.getElementById('note-box').style.display=it.status==='เสร็จแล้ว'?'none':'block';
   renderTimeline(it);showPage('page-detail');
 }
+
 function goBackFromDetail(){activeId=null;showPage('page-dept');}
 
-function changeStatus(ns,el){
+function changeStatus(ns){
   const it=items[activeId];
   if(!it || ns===it.status) return;
 
-  // ตรรกะใหม่: ยอมให้เปลี่ยนสลับไปมาได้เสมอ ยกเว้นว่างานนั้นจบไปแล้ว (ซึ่งถูกดักไว้ที่ openDetail แล้ว)
+  // Pop-up ยืนยันสถานะสำเร็จ
+  if (ns === 'เสร็จแล้ว') {
+    if (!confirm("⚠️ คุณต้องการยืนยันว่างานนี้ 'เสร็จแล้ว' ใช่หรือไม่?\n(เมื่อเสร็จแล้วจะไม่สามารถแก้ไขได้อีก)")) {
+      document.getElementById('d-status-select').value = it.status;
+      return;
+    }
+  }
+
   const ts=Date.now();
   itemsRef.child(activeId).update({
-    status:ns,
-    updated:nowStr(),
+    status:ns, updated:nowStr(),
     ['logs/'+ts]:{id:ts,type:'status',text:it.status+' → '+ns,time:nowStr(),ts}
   }).then(()=>{
     if(ns==='เสร็จแล้ว'){
-      toast('🎉 เสร็จสิ้นภารกิจ!');
+      toast('🎉 ภารกิจสำเร็จ!');
       setTimeout(()=>goBackFromDetail(),1200);
     } else {
       toast('↕ อัปเดตสถานะเป็น: ' + ns);
-      // รีเฟรชหน้า Detail เพื่ออัปเดตปุ่ม On/Off
       openDetail(activeId); 
     }
   });
