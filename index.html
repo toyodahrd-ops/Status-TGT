@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Status Tracker</title>
+<link rel="manifest" id="pwa-manifest">
+<meta name="theme-color" content="#1565C0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Status Tracker">
+<script>
+const manifest={name:"Status Tracker",short_name:"Tracker",description:"ระบบติดตามสถานะงาน",start_url:".",display:"standalone",background_color:"#F0F4FF",theme_color:"#1565C0",orientation:"portrait"};
+const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+document.getElementById('pwa-manifest').href=URL.createObjectURL(blob);
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Sarabun:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --blue:#1565C0;--blue2:#1976D2;
+  --ga:#1565C0;--ga-light:#E3F2FD;--ga-mid:#90CAF9;
+  --she:#2E7D32;--she-light:#E8F5E9;--she-mid:#81C784;
+  --hr:#6A1B9A;--hr-light:#F3E5F5;--hr-mid:#CE93D8;
+  --surface:rgba(255,255,255,0.97);--surface2:rgba(255,255,255,0.88);--surface3:rgba(240,247,255,0.95);
+  --text:#0D2744;--text2:#37474F;--text3:#78909C;
+  --border:rgba(21,101,192,0.15);--border2:rgba(21,101,192,0.3);
+  --shadow:0 2px 16px rgba(13,39,90,0.09);
+  --radius:14px;--radius-sm:9px;
+}
+body{font-family:'Sarabun',sans-serif;min-height:100vh;color:var(--text);background:linear-gradient(160deg,#EEF4FF 0%,#DDEEFF 60%,#E8F5FF 100%);background-attachment:fixed;}
+button{font-family:'Sarabun',sans-serif;cursor:pointer;}
+input,textarea,select{font-family:'Sarabun',sans-serif;}
+.page{display:none;flex-direction:column;min-height:100vh;animation:fadeIn .22s ease;}
+.page.active{display:flex;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.topbar{height:56px;padding:0 18px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;background:rgba(255,255,255,0.93);backdrop-filter:blur(18px);border-bottom:1px solid rgba(21,101,192,0.12);box-shadow:0 1px 10px rgba(13,39,90,0.07);}
+.brand-name{font-family:'Kanit',sans-serif;font-size:16px;font-weight:600;color:var(--blue);flex:1;}
+.conn-wrap{display:flex;align-items:center;gap:5px;}
+.conn-dot{width:8px;height:8px;border-radius:50%;background:#9E9E9E;transition:background .4s;}
+.conn-dot.online{background:#43A047;}
+.conn-label{font-size:12px;color:var(--text3);}
+.btn-back{background:var(--surface3);border:1px solid var(--border2);color:var(--blue);border-radius:var(--radius-sm);padding:6px 14px;font-size:13px;display:flex;align-items:center;gap:5px;transition:all .15s;}
+.btn-back:hover{background:var(--blue);color:#fff;}
+.overview-wrap{max-width:680px;margin:0 auto;padding:20px 16px;width:100%;}
+.add-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;margin-bottom:18px;box-shadow:var(--shadow);}
+.add-box-title{font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px;}
+
+/* ปรับปรุง Responsive ให้ปุ่มและช่องกรอก */
+.add-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.add-input{flex:1;min-width:140px;background:#F0F7FF;border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;}
+.add-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(21,101,192,0.08);}
+.add-input::placeholder{color:var(--text3);}
+.btn-add{flex:1;min-width:80px;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;border-radius:var(--radius-sm);padding:10px 22px;font-size:14px;font-weight:500;white-space:nowrap;transition:all .2s;box-shadow:0 2px 8px rgba(21,101,192,0.2);}
+.btn-add:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(21,101,192,0.3);}
+.btn-add:disabled{background:#90A4AE;cursor:not-allowed;transform:none;box-shadow:none;}
+
+.total-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:18px;}
+.tstat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 10px;text-align:center;box-shadow:var(--shadow);}
+.tstat-num{font-family:'Kanit',sans-serif;font-size:18px;font-weight:600;}
+.tstat-lbl{font-size:10px;color:var(--text3);margin-top:2px;line-height:1.3;}
+.dept-cards{display:flex;flex-direction:column;gap:12px;}
+.dept-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:all .2s;}
+.dept-card:hover{box-shadow:0 6px 24px rgba(13,39,90,0.13);transform:translateY(-2px);}
+.dept-bar{height:4px;width:100%;}
+.dept-bar-GA{background:linear-gradient(90deg,var(--ga),var(--ga-mid));}
+.dept-bar-SHE{background:linear-gradient(90deg,var(--she),var(--she-mid));}
+.dept-bar-HR{background:linear-gradient(90deg,var(--hr),var(--hr-mid));}
+.dept-card-header{padding:14px 18px 12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(0,0,0,0.05);}
+.dept-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.dept-icon-GA{background:var(--ga-light);}
+.dept-icon-SHE{background:var(--she-light);}
+.dept-icon-HR{background:var(--hr-light);}
+.dept-name{font-family:'Kanit',sans-serif;font-size:17px;font-weight:600;flex:1;}
+.dept-name-GA{color:var(--ga);}
+.dept-name-SHE{color:var(--she);}
+.dept-name-HR{color:var(--hr);}
+.dept-total{font-size:12px;color:var(--text3);}
+.dept-arrow{font-size:20px;color:var(--text3);}
+.dept-card:hover .dept-arrow{color:var(--blue);}
+.dept-card-stats{padding:10px 18px;display:flex;gap:7px;flex-wrap:wrap;}
+.dstat{padding:5px 12px;border-radius:99px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:4px;}
+.dstat-num{font-family:'Kanit',sans-serif;font-weight:600;font-size:13px;}
+.dstat-w{background:#FFF3E0;color:#BF360C;}
+.dstat-d{background:#E3F2FD;color:#0D47A1;}
+.dstat-dn{background:#E8F5E9;color:#1B5E20;}
+.dept-wrap{max-width:700px;margin:0 auto;padding:20px 16px;width:100%;}
+.dept-page-header{border-radius:var(--radius);padding:14px 18px;margin-bottom:14px;box-shadow:var(--shadow);}
+.dept-page-header-GA{background:var(--ga-light);border:1px solid var(--ga-mid);}
+.dept-page-header-SHE{background:var(--she-light);border:1px solid var(--she-mid);}
+.dept-page-header-HR{background:var(--hr-light);border:1px solid var(--hr-mid);}
+.dept-page-title{font-family:'Kanit',sans-serif;font-size:20px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.dept-page-title-GA{color:var(--ga);}
+.dept-page-title-SHE{color:var(--she);}
+.dept-page-title-HR{color:var(--hr);}
+.dept-mini-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+.dmstat{background:rgba(255,255,255,0.8);border-radius:var(--radius-sm);padding:9px;text-align:center;border:1px solid rgba(0,0,0,0.06);}
+.dmstat-num{font-family:'Kanit',sans-serif;font-size:20px;font-weight:600;}
+.dmstat-lbl{font-size:10px;color:var(--text3);margin-top:1px;}
+.filters{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap;}
+.ftab{padding:6px 14px;border-radius:99px;font-size:13px;border:1.5px solid var(--border2);background:var(--surface2);color:var(--text2);transition:all .15s;}
+.ftab:hover{border-color:var(--blue);color:var(--blue);}
+.ftab.on{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:500;}
+.ftab.hist.on{background:#546E7A;border-color:#546E7A;}
+.hist-badge{background:#EF5350;color:#fff;border-radius:99px;padding:1px 6px;font-size:10px;font-weight:600;margin-left:4px;}
+.items{display:flex;flex-direction:column;gap:8px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:var(--shadow);transition:all .2s;border-left:3px solid transparent;}
+.card:hover{box-shadow:0 4px 18px rgba(13,39,90,0.11);transform:translateX(2px);}
+.card-GA{border-left-color:var(--ga);}
+.card-SHE{border-left-color:var(--she);}
+.card-HR{border-left-color:var(--hr);}
+.card-done{border-left-color:#66BB6A !important;opacity:.8;}
+.card-info{flex:1;min-width:0;}
+.card-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.card-lbl{font-size:10px;font-weight:700;color:#546E7A;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;min-width:54px;}
+.card-title{font-size:14px;font-weight:700;color:#0D2744;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-meta-val{font-size:12px;color:#37474F;font-weight:500;}
+.card-preview-val{font-size:12px;color:#546E7A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic;}
+.card-assignee-val{font-size:12px;color:#1565C0;font-weight:600;background:#E3F2FD;border-radius:99px;padding:1px 9px;}
+.nc{background:#E3F2FD;color:var(--blue);border-radius:99px;padding:1px 8px;font-size:11px;font-weight:500;}
+.badge{padding:4px 12px;border-radius:99px;font-size:12px;font-weight:500;white-space:nowrap;}
+.b-w{background:#FFF3E0;color:#BF360C;}
+.b-d{background:#E3F2FD;color:#0D47A1;}
+.b-dn{background:#E8F5E9;color:#1B5E20;}
+.btn-del{background:none;border:none;color:var(--text3);font-size:15px;padding:4px;border-radius:4px;opacity:0;transition:opacity .15s;}
+.card:hover .btn-del{opacity:1;}
+.btn-del:hover{color:#D32F2F;}
+.arrow{color:var(--text3);font-size:18px;}
+.card:hover .arrow{color:var(--blue);}
+.empty{text-align:center;color:var(--text3);padding:44px;font-size:14px;}
+.empty-icon{font-size:30px;display:block;margin-bottom:8px;opacity:.5;}
+
+/* DETAIL PAGE STYLES */
+.detail-wrap{max-width:660px;margin:0 auto;padding:20px 16px;width:100%;}
+.detail-header{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:var(--shadow);border-top:4px solid var(--blue);}
+.detail-title{font-family:'Kanit',sans-serif;font-size:20px;font-weight:600;margin-bottom:14px;color:var(--text);}
+.detail-meta{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+
+/* Stepper Progress Styles (MODIFIED) */
+.stepper-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin: 25px 0;
+  position: relative;
+  padding: 0;
+}
+/* เส้นสีเทาด้านหลัง - ปรับตำแหน่งให้เริ่มกึ่งกลางเลข 1 ถึงกึ่งกลางเลข 3 */
+.stepper-wrapper::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  left: 17px;
+  right: 17px;
+  height: 4px;
+  background: #E0E0E0;
+  z-index: 0;
+  border-radius: 4px;
+}
+/* เส้นสีเขียวที่วิ่งตามสถานะ */
+.stepper-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 16px;
+  left: 17px;
+  width: var(--progress-width, 0%);
+  height: 4px;
+  background: #43A047;
+  z-index: 1;
+  border-radius: 4px;
+  transition: width 0.5s ease-in-out;
+  max-width: calc(100% - 34px);
+}
+
+.stepper-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+.step-counter {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #E0E0E0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: #90A4AE;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+  font-size: 13px;
+}
+.step-name { font-size: 11px; color: var(--text3); font-weight: 500; text-align: center; }
+
+/* Active & Completed States */
+.stepper-item.active .step-counter { border-color: var(--blue); color: var(--blue); transform: scale(1.1); background: #fff; }
+.stepper-item.active .step-name { color: var(--blue); font-weight: 600; }
+.stepper-item.completed .step-counter { background: #43A047; border-color: #43A047; color: white; }
+.stepper-item.completed .step-name { color: #43A047; }
+
+/* NEW: Dropdown style inside tl-box */
+.tl-box .status-dropdown {
+  background: #fff;
+  border: 1.5px solid var(--border2);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  min-width: 150px;
+}
+.tl-box .status-dropdown:focus { border-color: var(--blue); }
+.tl-box .status-dropdown:disabled { background: #f1f1f1; cursor: not-allowed; opacity: 0.7; }
+
+.note-box,.tl-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:var(--shadow);}
+.note-box textarea{width:100%;background:#F0F7FF;border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 13px;font-size:13px;color:var(--text);resize:vertical;min-height:80px;outline:none;transition:border-color .2s;line-height:1.6;}
+.note-btn-row{display:flex;justify-content:flex-end;margin-top:9px;}
+.btn-note{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 20px;font-size:13px;font-weight:500;box-shadow:0 2px 8px rgba(21,101,192,0.2);}
+
+.tl-item{display:flex;gap:11px;padding-bottom:14px;position:relative;}
+.tl-item:not(:last-child)::before{content:'';position:absolute;left:14px;top:28px;bottom:0;width:1px;background:var(--border);}
+.tl-dot{width:28px;height:28px;border-radius:50%;background:#E3F2FD;border:1.5px solid #90CAF9;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;color:var(--blue);}
+.tl-text{font-size:13px;line-height:1.55;background:#F0F7FF;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;white-space:pre-wrap;color:var(--text);}
+.tl-foot{display:flex;align-items:center;gap:5px;margin-top:4px;}
+.tl-time{font-size:11px;color:var(--text3);}
+.dept-pill{border-radius:99px;padding:3px 12px;font-size:12px;font-weight:600;}
+.dept-pill-GA{background:var(--ga-light);color:var(--ga);}
+.dept-pill-SHE{background:var(--she-light);color:var(--she);}
+.dept-pill-HR{background:var(--hr-light);color:var(--hr);}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;padding:10px 22px;border-radius:99px;font-size:13px;display:none;z-index:99;white-space:nowrap;box-shadow:0 4px 18px rgba(21,101,192,0.35);}
+
+/* Media query for small screens */
+@media (max-width: 480px) {
+  .tl-box div[style*="display: flex"] { flex-direction: column; align-items: flex-start !important; gap: 10px; }
+  .tl-box .status-dropdown { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="page active" id="page-overview">
+  <div class="topbar">
+    <span class="brand-name">Status Tracker</span>
+    <div class="conn-wrap">
+      <div class="conn-dot" id="conn-dot"></div>
+      <span class="conn-label" id="conn-label">กำลังเชื่อมต่อ...</span>
+    </div>
+  </div>
+  <div class="overview-wrap">
+    <div class="add-box">
+      <div class="add-box-title">เพิ่มงานใหม่</div>
+      <div class="add-row">
+        <input class="add-input" type="text" id="inp" placeholder="หัวข้อ / ชื่องาน..." onkeydown="if(event.key==='Enter')document.getElementById('inp-assign').focus()"/>
+      </div>
+      <div class="add-row" style="gap:8px;">
+        <input class="add-input" style="flex:2;" type="text" id="inp-assign" placeholder="👤 ผู้รับผิดชอบ" onkeydown="if(event.key==='Enter')addItem()"/>
+        
+        <select class="add-input" id="inp-dept" style="flex:1.2; cursor:pointer; background-color:#fff;" onchange="updateAddBtn()">
+          <option value="" disabled selected>ระบุแผนก</option>
+          <option value="GA">🏢 GA</option>
+          <option value="SHE">🛡️ SHE</option>
+          <option value="HR">👥 HR</option>
+        </select>
+
+        <button class="btn-add" id="btn-add" onclick="addItem()" disabled>+ เพิ่ม</button>
+      </div>
+    </div>
+    <div class="total-stats">
+      <div class="tstat"><div class="tstat-num" id="ov-all" style="color:var(--blue)">0</div><div class="tstat-lbl">งานทั้งหมด</div></div>
+      <div class="tstat"><div class="tstat-num" id="ov-w" style="color:#E65100">0</div><div class="tstat-lbl">กำลังทำ</div></div>
+      <div class="tstat"><div class="tstat-num" id="ov-d" style="color:#1565C0">0</div><div class="tstat-lbl">รอรายงาน</div></div>
+      <div class="tstat"><div class="tstat-num" id="ov-dn" style="color:#2E7D32">0</div><div class="tstat-lbl">เสร็จแล้ว</div></div>
+    </div>
+    <div class="dept-cards" id="dept-cards"></div>
+  </div>
+</div>
+
+<div class="page" id="page-dept">
+  <div class="topbar">
+    <button class="btn-back" onclick="goToDept(null)">← ภาพรวม</button>
+    <span id="dept-topbar-name" style="font-family:'Kanit',sans-serif;font-size:15px;font-weight:600;color:var(--blue);flex:1;margin-left:6px;"></span>
+    <div class="conn-dot" id="conn-dot2"></div>
+  </div>
+  <div class="dept-wrap">
+    <div class="dept-page-header" id="dept-page-header">
+      <div class="dept-page-title" id="dept-page-title"></div>
+      <div class="dept-mini-stats">
+        <div class="dmstat"><div class="dmstat-num" id="ds-w" style="color:#E65100">0</div><div class="dmstat-lbl">กำลังทำ</div></div>
+        <div class="dmstat"><div class="dmstat-num" id="ds-d" style="color:#1565C0">0</div><div class="dmstat-lbl">รอรายงาน</div></div>
+        <div class="dmstat"><div class="dmstat-num" id="ds-dn" style="color:#2E7D32">0</div><div class="dmstat-lbl">เสร็จแล้ว</div></div>
+      </div>
+    </div>
+    <div class="filters">
+      <div class="ftab on" id="f-active" onclick="setFilter('active',this)">งานปัจจุบัน</div>
+      <div class="ftab" onclick="setFilter('กำลังดำเนินการ',this)">กำลังดำเนินการ</div>
+      <div class="ftab" onclick="setFilter('รอรายงาน',this)">รอรายงาน</div>
+      <div class="ftab hist" onclick="setFilter('done',this)">ประวัติ<span class="hist-badge" id="hist-count" style="display:none">0</span></div>
+    </div>
+    <div class="items" id="list"></div>
+  </div>
+</div>
+
+<div class="page" id="page-detail">
+  <div class="topbar">
+    <button class="btn-back" onclick="goBackFromDetail()">← กลับ</button>
+  </div>
+  <div class="detail-wrap">
+    <div class="detail-header" id="detail-header">
+      <div class="detail-title" id="d-title"></div>
+      <div class="detail-meta">
+        <span id="d-assignee" style="background:#E3F2FD;color:#1565C0;border-radius:99px;padding:3px 12px;font-size:13px;font-weight:600;"></span>
+        <span id="d-dept-pill" class="dept-pill"></span>
+      </div>
+
+      <div class="stepper-wrapper">
+        <div class="stepper-item" id="step-1"><div class="step-counter">1</div><div class="step-name">กำลังทำ</div></div>
+        <div class="stepper-item" id="step-2"><div class="step-counter">2</div><div class="step-name">รอรายงาน</div></div>
+        <div class="stepper-item" id="step-3"><div class="step-counter">3</div><div class="step-name">เสร็จแล้ว</div></div>
+      </div>
+    </div>
+
+    <div class="note-box" id="note-box">
+      <div class="sec-label">ความคืบหน้า</div>
+      <textarea id="d-note" placeholder="ระบุรายละเอียด"></textarea>
+      <div class="note-btn-row"><button class="btn-note" onclick="addNote()">บันทึก</button></div>
+    </div>
+
+    <div class="tl-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <div class="sec-label" style="margin-bottom: 0;">ประวัติการอัปเดต</div>
+        
+        <select class="status-dropdown" id="d-status-select" onchange="changeStatus(this.value)">
+          <option value="กำลังดำเนินการ">🔄 กำลังทำ</option>
+          <option value="รอรายงาน">📢 รอรายงาน</option>
+          <option value="เสร็จแล้ว">✅ เสร็จแล้ว</option>
+        </select>
+      </div>
+      <div class="tl" id="d-tl"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyAEafNEvzFs1p_iptcPvhujggH30nkcSM8",authDomain:"tgt-status.firebaseapp.com",databaseURL:"https://tgt-status-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"tgt-status",storageBucket:"tgt-status.firebasestorage.app",messagingSenderId:"148559930953",appId:"1:148559930953:web:65cc5ea0c6ecc7811e8198"};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+const itemsRef=db.ref('tracker/items');
+
+let items={},curDept=null,curFilter='active',activeId=null;
+
+const DEPTS=[
+  {key:'GA',icon:'🏢',label:'General Affairs'},
+  {key:'SHE',icon:'🛡️',label:'Safety Health Env'},
+  {key:'HR',icon:'👥',label:'Human Resources'}
+];
+
+db.ref('.info/connected').on('value',snap=>{
+  const on=snap.val();
+  ['conn-dot','conn-dot2'].forEach(id=>{const el=document.getElementById(id);if(el)el.className='conn-dot'+(on?' online':'');});
+  document.getElementById('conn-label').textContent=on?'เชื่อมต่อแล้ว':'ไม่มีสัญญาณ...';
+  updateAddBtn();
+});
+
+itemsRef.on('value',snap=>{
+  items=snap.val()||{};
+  renderOverview();
+  if(curDept)renderDept();
+  if(activeId&&items[activeId])renderTimeline(items[activeId]);
+});
+
+function nowStr(){return new Date().toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function badgeClass(s){return s==='กำลังดำเนินการ'?'b-w':s==='รอรายงาน'?'b-d':'b-dn';}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2500);}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+
+function updateAddBtn(){
+  const connected=document.getElementById('conn-dot').classList.contains('online');
+  const deptInp = document.getElementById('inp-dept');
+  document.getElementById('btn-add').disabled=!(deptInp && deptInp.value && connected);
+}
+
+function addItem(){
+  const inp=document.getElementById('inp');
+  const assign=document.getElementById('inp-assign');
+  const deptInp = document.getElementById('inp-dept');
+  const title=inp.value.trim();
+  if(!title){inp.focus();return;}
+  if(!deptInp.value){toast('⚠️ กรุณาเลือกแผนก');return;}
+  const ts=Date.now();
+  itemsRef.push({
+    title,
+    assignee:assign.value.trim()||'ไม่ระบุ',
+    dept:deptInp.value,
+    status:'กำลังดำเนินการ',
+    updated:nowStr(),
+    createdAt:ts,
+    logs:{[ts]:{id:ts,type:'created',text:'สร้างหัวข้อนี้',time:nowStr(),ts}}
+  }).then(()=>{
+    inp.value='';assign.value='';
+    deptInp.selectedIndex = 0;
+    updateAddBtn();
+    toast('✅ เพิ่มงานสำเร็จ');
+  }).catch(()=>toast('❌ เกิดข้อผิดพลาด'));
+}
+
+function delItem(id){if(!confirm('ลบรายการนี้?'))return;itemsRef.child(id).remove().then(()=>toast('🗑 ลบรายการแล้ว'));}
+
+function renderOverview(){
+  const arr=Object.values(items);
+  const active=arr.filter(i=>i.status!=='เสร็จแล้ว');
+  document.getElementById('ov-all').textContent=active.length;
+  document.getElementById('ov-w').textContent=arr.filter(i=>i.status==='กำลังดำเนินการ').length;
+  document.getElementById('ov-d').textContent=arr.filter(i=>i.status==='รอรายงาน').length;
+  document.getElementById('ov-dn').textContent=arr.filter(i=>i.status==='เสร็จแล้ว').length;
+  document.getElementById('dept-cards').innerHTML=DEPTS.map(dept=>{
+    const dArr=arr.filter(i=>i.dept===dept.key);
+    const dActive=dArr.filter(i=>i.status!=='เสร็จแล้ว');
+    return `<div class="dept-card" onclick="goToDept('${dept.key}')">
+      <div class="dept-bar dept-bar-${dept.key}"></div>
+      <div class="dept-card-header">
+        <div class="dept-icon dept-icon-${dept.key}">${dept.icon}</div>
+        <div style="flex:1;"><div class="dept-name dept-name-${dept.key}">${dept.key}</div><div class="dept-total">${dept.label} · ${dActive.length} items</div></div>
+        <div class="dept-arrow">›</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function goToDept(dept){
+  if(!dept){showPage('page-overview');curDept=null;return;}
+  curDept=dept;curFilter='active';
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('f-active').classList.add('on');
+  const d=DEPTS.find(x=>x.key===dept);
+  document.getElementById('dept-topbar-name').textContent=d.icon+' '+dept;
+  const titleEl=document.getElementById('dept-page-title');
+  titleEl.className='dept-page-title dept-page-title-'+dept;
+  titleEl.innerHTML=d.icon+' <span>'+dept+' — '+d.label+'</span>';
+  document.getElementById('dept-page-header').className='dept-page-header dept-page-header-'+dept;
+  renderDept();showPage('page-dept');
+}
+
+function renderDept(){
+  if(!curDept)return;
+  const arr=Object.entries(items).map(([k,v])=>({...v,_id:k})).filter(i=>i.dept===curDept);
+  arr.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  const active=arr.filter(i=>i.status!=='เสร็จแล้ว');
+  const done=arr.filter(i=>i.status==='เสร็จแล้ว');
+  document.getElementById('ds-w').textContent=arr.filter(i=>i.status==='กำลังดำเนินการ').length;
+  document.getElementById('ds-d').textContent=arr.filter(i=>i.status==='รอรายงาน').length;
+  document.getElementById('ds-dn').textContent=done.length;
+  const hc=document.getElementById('hist-count');
+  hc.style.display=done.length>0?'inline':'none';hc.textContent=done.length;
+  let filtered=curFilter==='active'?active:curFilter==='done'?done:active.filter(i=>i.status===curFilter);
+  const list=document.getElementById('list');
+  if(!filtered.length){list.innerHTML=curFilter==='done'?`<div class="empty"><span class="empty-icon">📁</span>ยังไม่มีงานที่เสร็จแล้ว</div>`:`<div class="empty"><span class="empty-icon">📋</span>ไม่มีรายการในหมวดนี้</div>`;return;}
+  list.innerHTML=filtered.map(it=>{
+    const logs=it.logs?Object.values(it.logs):[];
+    const nc=logs.filter(l=>l.type==='note').length;
+    const ln=logs.filter(l=>l.type==='note').sort((a,b)=>(b.ts||0)-(a.ts||0))[0];
+    const isDone=it.status==='เสร็จแล้ว';
+    return `<div class="card ${isDone?'card-done':'card-'+curDept}" onclick="openDetail('${it._id}')">
+      <div class="card-info">
+        <div class="card-row"><span class="card-lbl">หัวข้อ</span><span class="card-title">${esc(it.title)}</span></div>
+        <div class="card-row"><span class="card-lbl">รับผิดชอบ</span><span class="card-assignee-val">👤 ${esc(it.assignee||'ไม่ระบุ')}</span>${nc?`&nbsp;<span class="nc">✎ ${nc} note</span>`:''}</div>
+        <div class="card-row"><span class="card-lbl">อัปเดต</span><span class="card-meta-val">${it.updated}</span></div>
+        ${ln?`<div class="card-row"><span class="card-lbl">Note</span><span class="card-preview-val">${esc(ln.text)}</span></div>`:''}
+      </div>
+      <span class="badge ${badgeClass(it.status)}">${it.status}</span>
+      <span class="arrow">›</span>
+      <button class="btn-del" onclick="event.stopPropagation();delItem('${it._id}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function setFilter(f,el){curFilter=f;document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('on'));el.classList.add('on');renderDept();}
+
+function openDetail(id){
+  activeId=id;const it=items[id];if(!it)return;
+  document.getElementById('d-title').textContent=it.title;
+  document.getElementById('d-assignee').textContent='👤 '+(it.assignee||'ไม่ระบุ');
+  const pill=document.getElementById('d-dept-pill');
+  const d=DEPTS.find(x=>x.key===it.dept);
+  pill.textContent=(d?d.icon:'')+' '+it.dept;
+  pill.className='dept-pill dept-pill-'+it.dept;
+  document.getElementById('detail-header').style.borderTopColor=it.dept==='GA'?'var(--ga)':it.dept==='SHE'?'var(--she)':'var(--hr)';
+  document.getElementById('d-note').value='';
+
+  // Update Status Dropdown & Stepper
+  const statusSelect = document.getElementById('d-status-select');
+  statusSelect.value = it.status;
+  
+  const statusOrder=['กำลังดำเนินการ','รอรายงาน','เสร็จแล้ว'];
+  const curIdx=statusOrder.indexOf(it.status);
+
+  // Stepper logic - ปรับระบายสีและเส้นให้เป๊ะ
+  const stepperWrapper = document.querySelector('.stepper-wrapper');
+  statusOrder.forEach((s, i) => {
+    const step = document.getElementById(`step-${i+1}`);
+    step.classList.remove('active', 'completed');
+    if (i < curIdx) step.classList.add('completed');
+    else if (i === curIdx) step.classList.add('active');
+  });
+
+  // คำนวณความยาวเส้นสีเขียว (0%, 50%, 100%)
+  const pWidth = curIdx === 0 ? 0 : curIdx === 1 ? 50 : 100;
+  stepperWrapper.style.setProperty('--progress-width', pWidth + '%');
+
+  // Lock logic
+  statusSelect.disabled = (it.status === 'เสร็จแล้ว');
+
+  document.getElementById('note-box').style.display=it.status==='เสร็จแล้ว'?'none':'block';
+  renderTimeline(it);showPage('page-detail');
+}
+
+function goBackFromDetail(){activeId=null;showPage('page-dept');}
+
+function changeStatus(ns){
+  const it=items[activeId];
+  if(!it || ns===it.status) return;
+
+  // Pop-up ยืนยันสถานะสำเร็จ
+  if (ns === 'เสร็จแล้ว') {
+    if (!confirm("⚠️ คุณต้องการยืนยันว่างานนี้ 'เสร็จแล้ว' ใช่หรือไม่?\n(เมื่อเสร็จแล้วจะไม่สามารถแก้ไขได้อีก)")) {
+      document.getElementById('d-status-select').value = it.status;
+      return;
+    }
+  }
+
+  const ts=Date.now();
+  itemsRef.child(activeId).update({
+    status:ns, updated:nowStr(),
+    ['logs/'+ts]:{id:ts,type:'status',text:it.status+' → '+ns,time:nowStr(),ts}
+  }).then(()=>{
+    if(ns==='เสร็จแล้ว'){
+      toast('🎉 ภารกิจสำเร็จ!');
+      setTimeout(()=>goBackFromDetail(),1200);
+    } else {
+      toast('↕ อัปเดตสถานะเป็น: ' + ns);
+      openDetail(activeId); 
+    }
+  });
+}
+
+function addNote(){
+  const ta=document.getElementById('d-note');const text=ta.value.trim();if(!text)return;
+  const ts=Date.now();
+  itemsRef.child(activeId).update({updated:nowStr(),['logs/'+ts]:{id:ts,type:'note',text,time:nowStr(),ts}}).then(()=>{ta.value='';toast('✎ บันทึก note แล้ว');});
+}
+
+function delNote(logId){itemsRef.child(activeId+'/logs/'+logId).remove().then(()=>toast('ลบ note แล้ว'));}
+
+function renderTimeline(it){
+  const tl=document.getElementById('d-tl');
+  const logs=it.logs?Object.values(it.logs):[];
+  if(!logs.length){tl.innerHTML='<div style="font-size:13px;color:#78909C">ยังไม่มีประวัติ</div>';return;}
+  const sorted=[...logs].sort((a,b)=>(b.ts||0)-(a.ts||0));
+  const latestNoteId=sorted.find(l=>l.type==='note')?.id;
+  tl.innerHTML=sorted.map(l=>{
+    if(l.type==='status')return`<div class="tl-item"><div class="tl-dot sd">↕</div><div class="tl-body"><div class="tl-text sc">เปลี่ยน status: ${esc(l.text)}</div><div class="tl-foot"><span class="tl-time">${l.time}</span></div></div></div>`;
+    if(l.type==='created')return`<div class="tl-item"><div class="tl-dot" style="font-size:11px">✦</div><div class="tl-body"><div class="tl-text cr">${esc(l.text)}</div><div class="tl-foot"><span class="tl-time">${l.time}</span></div></div></div>`;
+    const isLatest=l.id===latestNoteId;
+    return`<div class="tl-item"><div class="tl-dot nd">✎</div><div class="tl-body"><div class="tl-text">${esc(l.text)}${isLatest?' <span class="tl-new">ล่าสุด</span>':''}</div><div class="tl-foot"><span class="tl-time">${l.time}</span><button class="btn-tl-del" onclick="delNote(${l.id})">ลบ</button></div></div></div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
